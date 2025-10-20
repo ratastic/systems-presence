@@ -77,5 +77,10 @@ public class TileController : MonoBehaviour
                 changes.Add((x + 2 + bounds.xMin, y + bounds.yMin, "create")); // if no tile to the right, add
             }
         }
+
+        // if x = 0 die; if x = 171 die
+        // if y = 91 die; if y = 0 die
+
+        //if (testTile = )
     }
 }
