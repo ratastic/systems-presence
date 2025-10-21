@@ -2,6 +2,7 @@ using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine.Tilemaps;
+using UnityEngine.InputSystem;
 // using UnityEngine.UI;
 // using TMPro;
 
@@ -9,28 +10,68 @@ public class TileController : MonoBehaviour
 {
     private Tilemap tilemap;
     public Tile testTile;
-    public Tile randomTile;
-    public float waitTime;
+    public Tile testTile2;
+    public float waitTime; // time to wait between each tile draw
 
-    private int xDir = 1; 
+    private int xDir = 1; // direction 
     private int yDir = 0;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         tilemap = GetComponent<Tilemap>();
         StartCoroutine(DrawTile()); // left and right draw
+
+        // random initial direction
+        if (Random.value > 0.5f)
+        {
+            xDir = Random.value > 0.5f ? 1 : -1;
+            yDir = 0;
+        }
+        else
+        {
+            xDir = 0;
+            yDir = Random.value > 0.5f ? 1 : -1;
+        }
     }
 
-    // Update is called once per frame
     void Update()
     {
-        
+        PlayerInput();
     }
 
+    public void PlayerInput()
+    {
+        if (Input.GetMouseButton(0)) // place tile with left click
+        {
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int cellPos = tilemap.WorldToCell(worldPos);
+
+            tilemap.SetTile(cellPos, testTile); // place the tile
+        }
+
+        if (Input.GetMouseButton(1)) // remove tile with right click
+        {
+            Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            Vector3Int cellPos = tilemap.WorldToCell(worldPos);
+
+            tilemap.SetTile(cellPos, null); // place no tile
+        }
+    }
     public IEnumerator DrawTile()
     {
         while (true)
         {
+            if (Random.value > 0.5f)
+            {
+                xDir = Random.value > 0.5f ? 1 : -1;
+                yDir = 0;
+            }
+            else
+            {
+                xDir = 0;
+                yDir = Random.value > 0.5f ? 1 : -1;
+            }
+
             BoundsInt bounds = tilemap.cellBounds; // boundsint gives bounds of where tiles can reasonably be
             TileBase[] allTiles = tilemap.GetTilesBlock(bounds); // gets the tiles in terms of 1D array representation
 
@@ -38,7 +79,7 @@ public class TileController : MonoBehaviour
 
             var changes = new HashSet<(int, int, string)>(); // mark all changes needed to be made
 
-            for (int x = 0; x < bounds.size.x; x++) 
+            for (int x = 0; x < bounds.size.x; x++)
             {
                 for (int y = 0; y < bounds.size.y; y++) // iterate over x y
                 {
@@ -53,11 +94,11 @@ public class TileController : MonoBehaviour
 
             foreach ((int, int, string) change in changes) // implement changes
             {
-                if (change.Item3.Equals("create"))
+                if (change.Item3.Equals("create")) // create logic
                 {
                     tilemap.SetTile(new Vector3Int(change.Item1, change.Item2, 0), testTile);
                 }
-                else if (change.Item3.Equals("kys"))
+                else if (change.Item3.Equals("kys")) // uncreate logic
                 {
                     tilemap.SetTile(new Vector3Int(change.Item1, change.Item2, 0), null);
                 }
@@ -69,25 +110,9 @@ public class TileController : MonoBehaviour
 
     private void CheckRules(int x, int y, BoundsInt bounds, TileBase[] allTiles, HashSet<(int, int, string)> changes)
     {
-        // if (x < bounds.size.x - 1) // check if can populate to the right
-        // {
-        //     TileBase tile = allTiles[x + 1 + y * bounds.size.x]; // "+1" get tile to the right
-        //     if (tile != null)
-        //     {
-        //         changes.Add((x + 1 + bounds.xMin, y + bounds.yMin, "kys")); // if tile to the right, kys
-        //     }
-        //     else
-        //     {
-        //         changes.Add((x + 2 + bounds.xMin, y + bounds.yMin, "create")); // if no tile to the right, add
-        //     }
-        // }
-        // if x = 0 die; if x = 171 die
-        // if y = 91 die; if y = 0 die
-
-        //if (testTile = )
 
         int worldX = x + bounds.xMin;
-        int worldY = y + bounds.yMin;
+        int worldY = y + bounds.yMin; // convert to world coords
 
         int nextX = worldX + xDir;
         int nextY = worldY + yDir;
@@ -108,11 +133,28 @@ public class TileController : MonoBehaviour
 
         if (nextTile != null)
         {
-            changes.Add((nextX, nextY, "kys"));
+            changes.Add((nextX, nextY, "kys")); // remove tile if one exists
         }
         else
         {
-            changes.Add((nextX, nextY, "create"));
+            changes.Add((nextX, nextY, "create")); // add tile otherwise
         }
     }
 }
+
+// if (x < bounds.size.x - 1) // check if can populate to the right
+        // {
+        //     TileBase tile = allTiles[x + 1 + y * bounds.size.x]; // "+1" get tile to the right
+        //     if (tile != null)
+        //     {
+        //         changes.Add((x + 1 + bounds.xMin, y + bounds.yMin, "kys")); // if tile to the right, kys
+        //     }
+        //     else
+        //     {
+        //         changes.Add((x + 2 + bounds.xMin, y + bounds.yMin, "create")); // if no tile to the right, add
+        //     }
+        // }
+        // if x = 0 die; if x = 171 die
+        // if y = 91 die; if y = 0 die
+
+        //if (testTile = )
