@@ -10,6 +10,8 @@ public class ButtonController : MonoBehaviour
 {
     public GameObject instructionsPanel;
     public Tilemap tm;
+    public AudioSource feedback;
+    public AudioSource squeak;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,10 +27,12 @@ public class ButtonController : MonoBehaviour
     public void TogglePanelView()
     {
         instructionsPanel.SetActive(!instructionsPanel.activeSelf);
+        feedback.Play();
     }
     
     public void WipeBoard()
     {
         tm.ClearAllTiles();
+        squeak.Play();
     }
 }
