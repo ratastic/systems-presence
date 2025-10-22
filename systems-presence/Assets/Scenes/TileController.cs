@@ -16,6 +16,8 @@ public class TileController : MonoBehaviour
     private int xDir = 1; // direction 
     private int yDir = 0;
     public int eraserSize;
+    public int penSize;
+    public int sizeChange = 1;
 
     public enum Direction
     {
@@ -35,6 +37,35 @@ public class TileController : MonoBehaviour
     void Update()
     {
         PlayerInput();
+        ToolSizing();
+    }
+
+    public void ToolSizing()
+    {
+        Debug.Log("current pen size:" + penSize + "current eraser size:" + eraserSize);
+
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            eraserSize += sizeChange;
+        }
+
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            eraserSize -= sizeChange;
+        }
+
+        if (Input.GetKeyDown(KeyCode.A))
+        {
+            penSize -= sizeChange;
+        }
+
+        if (Input.GetKeyDown(KeyCode.D))
+        {
+            penSize += sizeChange;
+        }
+
+        penSize = Mathf.Clamp(penSize, 1, 12);
+        eraserSize = Mathf.Clamp(eraserSize, 1, 12);
     }
 
     public void Randomizer()
@@ -70,7 +101,16 @@ public class TileController : MonoBehaviour
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int cellPos = tilemap.WorldToCell(worldPos);
 
-            tilemap.SetTile(cellPos, testTile); // place the tile
+            int penRadius = penSize;
+
+            for (int x = -penRadius; x <= penRadius; x++)
+            {
+                for (int y = -penRadius; y <= penRadius; y++) 
+                {
+                    Vector3Int bigPen = new Vector3Int(cellPos.x + x, cellPos.y + y, 0);
+                    tilemap.SetTile(bigPen, testTile); 
+                }
+            }
         }
 
         if (Input.GetMouseButton(1)) // remove tile with right click
@@ -78,12 +118,12 @@ public class TileController : MonoBehaviour
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int cellPos = tilemap.WorldToCell(worldPos);
 
-            int radius = eraserSize;
+            int eraserRadius = eraserSize;
 
-            // for loops map out 3x3 eraser
-            for (int x = -radius; x <= radius; x++) // total x range
+            // for loops determines size of eraser
+            for (int x = -eraserRadius; x <= eraserRadius; x++) // total x range
             {
-                for (int y = -radius; y <= radius; y++) // total y range
+                for (int y = -eraserRadius; y <= eraserRadius; y++) // total y range
                 {
                     Vector3Int bigEraser = new Vector3Int(cellPos.x + x, cellPos.y + y, 0);
                     tilemap.SetTile(bigEraser, null); // place empty tile
@@ -112,7 +152,7 @@ public class TileController : MonoBehaviour
                     if (tile != null) // if any tile is there, check rules
                     {
                         CheckRules(x, y, bounds, allTiles, changes); // pass in changes
-                        Debug.Log("x:" + x + " y:" + y + " tile:" + tile.name);
+                        //Debug.Log("x:" + x + " y:" + y + " tile:" + tile.name);
                     }
                 }
             }

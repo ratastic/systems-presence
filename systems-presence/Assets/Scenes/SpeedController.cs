@@ -1,6 +1,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Collections;
+using System.Drawing;
 
 public class SpeedController : MonoBehaviour
 {
@@ -9,6 +10,7 @@ public class SpeedController : MonoBehaviour
 
     void Update()
     {
+
         if (Input.GetKey(KeyCode.UpArrow))
         {
             tc.waitTime = Mathf.Max(0f, tc.waitTime - changeRate * Time.deltaTime); // limit to 0 or higher
