@@ -9,16 +9,13 @@ using UnityEngine.InputSystem;
 public class TileController : MonoBehaviour
 {
     private Tilemap tilemap;
-    public Tile testTile;
-    public Tile testTile2;
+    public Tile[] tileTypes = new Tile[5];
     public float waitTime; // time to wait between each tile draw
-
     private int xDir = 1; // direction 
     private int yDir = 0;
     public int eraserSize;
     public int penSize;
     public int sizeChange = 1;
-
     public enum Direction
     {
         Up,
@@ -108,7 +105,8 @@ public class TileController : MonoBehaviour
                 for (int y = -penRadius; y <= penRadius; y++) 
                 {
                     Vector3Int bigPen = new Vector3Int(cellPos.x + x, cellPos.y + y, 0);
-                    tilemap.SetTile(bigPen, testTile); 
+                    Tile randomTile = tileTypes[Random.Range(0, tileTypes.Length)];
+                    tilemap.SetTile(bigPen, randomTile); 
                 }
             }
         }
@@ -161,7 +159,8 @@ public class TileController : MonoBehaviour
             {
                 if (change.Item3.Equals("create")) // create logic
                 {
-                    tilemap.SetTile(new Vector3Int(change.Item1, change.Item2, 0), testTile);
+                    Tile randomTile = tileTypes[Random.Range(0, tileTypes.Length)];
+                    tilemap.SetTile(new Vector3Int(change.Item1, change.Item2, 0), randomTile);
                 }
                 else if (change.Item3.Equals("kys")) // uncreate logic
                 {
