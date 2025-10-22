@@ -1013,9 +1013,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 8369a930d49634b54afc03fb907159df, type: 2}
   - {fileID: 11400000, guid: 0d821233330eb46e4a0ffd6b433e8011, type: 2}
   - {fileID: 11400000, guid: e130c5746b1b74033a45088aacbd7a8a, type: 2}
+  - {fileID: 11400000, guid: e8302fcba862449b28129ed95da478b7, type: 2}
   waitTime: 0.2
-  eraserSize: 12
-  penSize: 12
+  eraserSize: 5
+  penSize: 1
   sizeChange: 1
 --- !u!483693784 &1660176762
 TilemapRenderer:
