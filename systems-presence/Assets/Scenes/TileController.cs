@@ -15,28 +15,52 @@ public class TileController : MonoBehaviour
 
     private int xDir = 1; // direction 
     private int yDir = 0;
+    public int eraserSize;
+
+    public enum Direction
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         tilemap = GetComponent<Tilemap>();
         StartCoroutine(DrawTile()); // left and right draw
-
-        // random initial direction
-        if (Random.value > 0.5f)
-        {
-            xDir = Random.value > 0.5f ? 1 : -1;
-            yDir = 0;
-        }
-        else
-        {
-            xDir = 0;
-            yDir = Random.value > 0.5f ? 1 : -1;
-        }
+        Randomizer(); // random initial direction
     }
 
     void Update()
     {
         PlayerInput();
+    }
+
+    public void Randomizer()
+    {
+        // set random direction either vertical or horizontal
+        Direction dir = (Direction)Random.Range(0, 4);
+
+        switch (dir)
+        {
+            case Direction.Up:
+                xDir = 0;
+                yDir = 1;
+                break;
+            case Direction.Down:
+                xDir = 0;
+                yDir = -1;
+                break;
+            case Direction.Left:
+                xDir = -1;
+                yDir = 0;
+                break;
+            case Direction.Right:
+                xDir = 1;
+                yDir = 0;
+                break;
+        }
     }
 
     public void PlayerInput()
@@ -54,23 +78,24 @@ public class TileController : MonoBehaviour
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int cellPos = tilemap.WorldToCell(worldPos);
 
-            tilemap.SetTile(cellPos, null); // place no tile
+            int radius = eraserSize;
+
+            // for loops map out 3x3 eraser
+            for (int x = -radius; x <= radius; x++) // total x range
+            {
+                for (int y = -radius; y <= radius; y++) // total y range
+                {
+                    Vector3Int bigEraser = new Vector3Int(cellPos.x + x, cellPos.y + y, 0);
+                    tilemap.SetTile(bigEraser, null); // place empty tile
+                }
+            }
         }
     }
     public IEnumerator DrawTile()
     {
         while (true)
         {
-            if (Random.value > 0.5f)
-            {
-                xDir = Random.value > 0.5f ? 1 : -1;
-                yDir = 0;
-            }
-            else
-            {
-                xDir = 0;
-                yDir = Random.value > 0.5f ? 1 : -1;
-            }
+            Randomizer();
 
             BoundsInt bounds = tilemap.cellBounds; // boundsint gives bounds of where tiles can reasonably be
             TileBase[] allTiles = tilemap.GetTilesBlock(bounds); // gets the tiles in terms of 1D array representation
@@ -107,33 +132,38 @@ public class TileController : MonoBehaviour
             yield return new WaitForSeconds(waitTime);
         }
     }
-
+    // given tile at (x, y) -> check tile in a direction (xdir ydir) -> check if add or remove tile
     private void CheckRules(int x, int y, BoundsInt bounds, TileBase[] allTiles, HashSet<(int, int, string)> changes)
     {
-
+        // convert to grid position in the world
         int worldX = x + bounds.xMin;
-        int worldY = y + bounds.yMin; // convert to world coords
+        int worldY = y + bounds.yMin;
 
+        // tile next x and y pos is the world coord and placed in the direction
         int nextX = worldX + xDir;
         int nextY = worldY + yDir;
 
+        // if the next x pos aims to cross / exceed vertical bounds, flip xdir
         if (nextX <= bounds.xMin || nextX >= bounds.xMax)
         {
             xDir *= -1;
-            nextX = worldX + xDir;
+            nextX = worldX + xDir; // define next x
         }
 
+        // if the next y pos aims to cross / exceed horizontal bounds, flip ydir
         if (nextY <= bounds.yMin || nextY >= bounds.yMax)
         {
             yDir *= -1;
-            nextY = worldY + yDir;
+            nextY = worldY + yDir; // define next y
         }
 
+        // logic depending on what tile is in next planned spot
         TileBase nextTile = tilemap.GetTile(new Vector3Int(nextX, nextY, 0));
 
-        if (nextTile != null)
+
+        if (nextTile != null) // if a tile already resides
         {
-            changes.Add((nextX, nextY, "kys")); // remove tile if one exists
+            changes.Add((nextX, nextY, "kys")); // remove 
         }
         else
         {
