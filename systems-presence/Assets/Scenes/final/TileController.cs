@@ -14,7 +14,7 @@ public class TileController : MonoBehaviour
     private int xDir = 1; // direction 
     private int yDir = 0;
     public int eraserSize;
-    public int penSize;
+    public int penSize = 1;
     public int sizeChange = 1;
     public enum Direction
     {
@@ -98,15 +98,23 @@ public class TileController : MonoBehaviour
             Vector3 worldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             Vector3Int cellPos = tilemap.WorldToCell(worldPos);
 
-            int penRadius = penSize;
-
-            for (int x = -penRadius; x <= penRadius; x++)
+            if (penSize == 1)
             {
-                for (int y = -penRadius; y <= penRadius; y++) 
+                Vector3Int regPen = new Vector3Int(cellPos.x, cellPos.y, 0);
+                Tile randomTile = tileTypes[Random.Range(0, tileTypes.Length)];
+                tilemap.SetTile(regPen, randomTile);
+            } else
+            {
+                int penRadius = penSize;
+
+                for (int x = -penRadius; x <= penRadius; x++)
                 {
-                    Vector3Int bigPen = new Vector3Int(cellPos.x + x, cellPos.y + y, 0);
-                    Tile randomTile = tileTypes[Random.Range(0, tileTypes.Length)];
-                    tilemap.SetTile(bigPen, randomTile); 
+                    for (int y = -penRadius; y <= penRadius; y++)
+                    {
+                        Vector3Int bigPen = new Vector3Int(cellPos.x + x, cellPos.y + y, 0);
+                        Tile randomTile = tileTypes[Random.Range(0, tileTypes.Length)];
+                        tilemap.SetTile(bigPen, randomTile);
+                    }
                 }
             }
         }
